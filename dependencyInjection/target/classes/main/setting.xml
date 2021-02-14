@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+	
+	<!-- <context:component-scan base-package="console"/> -->
+	<!-- <context:component-scan base-package="console"/> -->
+	<!-- Exam exam = new NewlecExam() -->
+	<!-- pタグを利用する方法 -->
+	<!-- <bean id="exam" class="exam.NewlecExam" p:kor="30" p:eng="20" p:math="40" > -->
+		<!-- setを利用するセッティング -->
+		<!--  
+		<property name="kor">
+			<value>30</value>
+		</property>
+		<property name="eng" value="20"/>
+		<property name="math" value="40"/>
+		-->
+		<!-- コンストラクタを利用 -->
+		<!--  
+		<constructor-arg name="kor" value="30"/>
+		<constructor-arg name="eng" value="20"/>
+		<constructor-arg name="math" value="40"/>
+		-->
+	<!-- </bean> -->
+	<!--
+		List<Exam> exams = new ArrayList<>();
+		exams.add(exam);  
+	-->
+	<!-- <util:list id="exams" list-class="java.util.ArrayList">
+		<bean class="exam.NewlecExam" p:kor="1" p:eng="1" p:math="1" />
+		<ref bean="exam"/>
+	</util:list> -->
+	<!--  
+	<bean id="exams" class="java.util.ArrayList">
+		<constructor-arg>
+			<list>
+				<bean class="exam.NewlecExam" p:kor="1" p:eng="1" p:math="1" />
+				<ref bean="exam"/>
+			</list>
+		</constructor-arg>
+	</bean>
+	-->
+	<!-- Console console = new  GridExamConsole() -->
+	<!--  <bean id="console" class="console.GridExamConsole"> -->
+		<!-- setExam(exam)  -->
+		<!-- <property name="exam" ref="exam"/> -->
+	<!-- </bean> -->
+
+</beans>

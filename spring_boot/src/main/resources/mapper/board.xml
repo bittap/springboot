@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mybatis.mapper.mapperBoard">
+	<insert id="boardSInsert" parameterType="map">
+		INSERT INTO board_sub_t(bm_no, bs_seq, bs_file, bs_size)
+		VALUES(#{bm_no}, 1, #{bs_file} ,#{bs_size})
+	</insert>
+	<update id="bmHitUpdate" parameterType="map">
+		UPDATE board_master_t 
+		SET bm_hit = bm_hit + 1
+		WHERE bm_no = #{bm_no} 
+	</update>
+	
+	<select id="getTotal" parameterType="string" resultType="int">
+		select count(bm.bm_no) 
+	    from board_master_t bm, board_sub_t bs
+       	where bm.bm_no = bs.bm_no(+)
+       	<!-- 제목검색 -->
+		<if test="cb_search!=null and cb_search.equals('bm_title')">
+			AND bm.bm_title LIKE '%' || #{keyword} || '%'
+		</if>
+		<!-- 내용 검색 -->
+		<if test="cb_search!=null and cb_search.equals('bm_content')">
+			AND bm.bm_content LIKE '%' || #{keyword} || '%'
+		</if>
+		<!-- 작성자 검색 -->
+		<if test="cb_search!=null and cb_search.equals('bm_writer')">
+			AND bm.bm_writer LIKE '%' || #{keyword} || '%'
+		</if>
+		<!-- 작성일 검색 -->
+		<if test="bm_date!=null and bm_date.length()==10">
+			AND bm.bm_date LIKE '%' || #{bm_date} || '%'
+		</if>
+	</select>
+	<update id="bmStepUpdate" parameterType="map">
+		update board_master_t
+	     	set bm_step = bm_step + 1
+	      where bm_group = #{bm_group}
+	  <![CDATA[ and bm_step > #{bm_step} ]]>
+	</update>
+	<select id="getBmGroup" parameterType="int" resultType="int">
+		  SELECT NVL((SELECT /*+index_desc(board_master_t IBM_GROUP)*/ bm_group 
+		   from board_master_t where bm_group>0 
+		    AND rownum=1),0)+1 bm_group from dual
+	</select>
+	<select id="getBmNo" parameterType="int" resultType="int">
+	   SELECT NVL(( select /*+index_desc(board_master_t MASTER_NO_PK) */ bm_no from board_master_t where rownum =1),0)+1 bm_no FROM dual
+	</select>
+	
+	<insert id="boardMInsert" parameterType="map">
+	
+	INSERT INTO board_master_t (bm_no, bm_title, bm_writer, bm_content, bm_date, bm_pw, bm_email,bm_group,bm_pos,bm_step)
+	  VALUES(#{bm_no}, #{bm_title}, #{bm_writer},#{bm_content},to_char(sysdate, 'YYYY-MM-DD'), #{bm_pw}, #{bm_email}, #{bm_group}, #{bm_pos}, #{bm_step})
+	</insert>
+
+<!-- 메소드 이름과 쿼리문의 id값은 같은값으로 한다. -->
+	<update id="boardUpdate" parameterType="map">
+	UPDATE board_master_t 
+	SET bm_title = #{bm_title}
+		,bm_writer = #{bm_writer}
+		,bm_email = #{bm_email}
+		,bm_content = #{bm_content}
+		,bm_pw = #{bm_pw}
+		,bm_date = to_char(sysdate, 'YYYY-MM-DD')
+	WHERE bm_no = #{bm_no}
+	</update>
+
+	<delete id="boardDelete" parameterType="map">
+	DELETE from board_master_t
+	WHERE bm_no = #{bm_no}
+	</delete>
+	<delete id="boardSDelete" parameterType="map">
+	DELETE from board_sub_t
+	WHERE bm_no = #{bm_no}
+	AND bs_seq = 1
+	</delete>
+
+	
+	<select id="boardList" resultType="map" parameterType="map">
+		SELECT 
+				a.rno, a.bm_no, a.bm_title, a.bm_email, a.bm_content, a.bs_file, a.bm_writer, a.bm_hit, a.bm_pw, a.bm_group, a.bm_pos, a.bm_step, a.bm_date
+			FROM (
+					SELECT rownum rno, bm.bm_date
+						,bm.bm_no, bm.bm_title, bm.bm_content, bm.bm_email, NVL(bs.bs_file, '파일없음') bs_file
+						,bm.bm_writer, bm.bm_pw, bm_hit, bm.bm_group, bm.bm_pos, bm.bm_step  
+				    FROM board_master_t bm, board_sub_t bs 
+					WHERE bm.bm_no = bs.bm_no(+)
+					<!-- 제목 검색 -->
+					<if test="cb_search!=null and cb_search.equals('bm_title')">
+						AND bm.bm_title LIKE '%' || #{keyword} || '%'
+					</if>
+					<!-- 내용 검색 -->
+					<if test="cb_search!=null and cb_search.equals('bm_content')">
+						AND bm.bm_content LIKE '%' || #{keyword} || '%'
+					</if>
+					<!-- 작성자 검색 -->
+					<if test="cb_search!=null and cb_search.equals('bm_writer')">
+						AND bm.bm_writer LIKE '%' || #{keyword} || '%'
+					</if>
+					<!-- 작성일 검색 -->
+					<if test="bm_date!=null and bm_date.length()==10">
+						AND bm.bm_date LIKE '%' || #{bm_date} || '%'
+					</if>
+				 )a
+	 	WHERE 1 = 1
+		<if test="bm_no>0">
+			AND a.bm_no = #{bm_no}
+		</if>
+		<if test="start>0 and end>0">
+			AND a.rno BETWEEN #{start} AND #{end}
+		</if> 
+		ORDER BY a.bm_group desc, a.bm_step asc
+	</select>
+</mapper>
